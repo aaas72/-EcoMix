@@ -24,34 +24,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Center: Navigation Links */}
-      <div className="hidden md:flex items-center gap-6">
-        <a
-          className="text-[#4edea3] font-bold text-sm hover:text-white transition-colors duration-300"
-          href="#"
-        >
-          {language === 'en' ? 'Dashboard' : 'Panel'}
-        </a>
-        <a
-          className="text-[#c6c6cc] text-sm hover:text-white transition-colors duration-300"
-          href="#"
-        >
-          {language === 'en' ? 'Analytics' : 'Analiz'}
-        </a>
-        <a
-          className="text-[#c6c6cc] text-sm hover:text-white transition-colors duration-300"
-          href="#"
-        >
-          {language === 'en' ? 'Compliance' : 'Uyumluluk'}
-        </a>
-        <a
-          className="text-[#c6c6cc] text-sm hover:text-white transition-colors duration-300"
-          href="#"
-        >
-          {language === 'en' ? 'Reports' : 'Raporlar'}
-        </a>
-      </div>
-
       {/* Right Section: Language Toggle & Profile Spacer */}
       <div className="flex items-center gap-3">
         {/* Language selector button */}
