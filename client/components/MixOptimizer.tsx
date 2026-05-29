@@ -313,6 +313,14 @@ export default function MixOptimizer() {
           {/* 4-Card Overview KPI Grid (Placed right below Compliance Panel for immediate feedback!) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-gutter w-full mt-2">
             <KPICard
+              label={t('compliance')}
+              icon="verified"
+              metric={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
+              caption={t('complianceCap')}
+              glowColor="#4edea3"
+              footer={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
+            />
+            <KPICard
               label={t('carbonRed')}
               icon="eco"
               metric={`-${carbonReduction}%`}
@@ -332,14 +340,6 @@ export default function MixOptimizer() {
               metric={`${optimizedMix.strength} MPa`}
               caption={`${t('strengthCap')}: ${TARGET_STRENGTHS[strengthClass]} MPa`}
               glowColor="#c9e6ff"
-            />
-            <KPICard
-              label={t('compliance')}
-              icon="verified"
-              metric={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
-              caption={t('complianceCap')}
-              glowColor="#4edea3"
-              footer={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
             />
           </div>
 
