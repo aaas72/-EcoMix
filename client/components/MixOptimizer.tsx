@@ -353,41 +353,39 @@ export default function MixOptimizer() {
                 </ResponsiveContainer>
               </div>
             </div>
+          {/* 4-Card Overview KPI Grid (Placed inside Right Column to keep Left Column sticky!) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-gutter w-full mt-2">
+            <KPICard
+              label={t('carbonRed')}
+              icon="eco"
+              metric={`-${carbonReduction}%`}
+              caption={t('carbonRedCap')}
+              glowColor="#4edea3"
+            />
+            <KPICard
+              label={t('costSavings')}
+              icon="payments"
+              metric={`-${costSavings}%`}
+              caption={t('costSavingsCap')}
+              glowColor="#89ceff"
+            />
+            <KPICard
+              label={t('strengthMetric')}
+              icon="fitness_center"
+              metric={`${optimizedMix.strength} MPa`}
+              caption={`${t('strengthCap')}: ${TARGET_STRENGTHS[strengthClass]} MPa`}
+              glowColor="#c9e6ff"
+            />
+            <KPICard
+              label={t('compliance')}
+              icon="verified"
+              metric={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
+              caption={t('complianceCap')}
+              glowColor="#4edea3"
+              footer={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
+            />
           </div>
         </div>
-      </section>
-
-      {/* 4-Card Overview KPI Grid (Now placed below inputs as computed results!) */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter w-full">
-        <KPICard
-          label={t('carbonRed')}
-          icon="eco"
-          metric={`-${carbonReduction}%`}
-          caption={t('carbonRedCap')}
-          glowColor="#4edea3"
-        />
-        <KPICard
-          label={t('costSavings')}
-          icon="payments"
-          metric={`-${costSavings}%`}
-          caption={t('costSavingsCap')}
-          glowColor="#89ceff"
-        />
-        <KPICard
-          label={t('strengthMetric')}
-          icon="fitness_center"
-          metric={`${optimizedMix.strength} MPa`}
-          caption={`${t('strengthCap')}: ${TARGET_STRENGTHS[strengthClass]} MPa`}
-          glowColor="#c9e6ff"
-        />
-        <KPICard
-          label={t('compliance')}
-          icon="verified"
-          metric={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
-          caption={t('complianceCap')}
-          glowColor="#4edea3"
-          footer={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
-        />
       </section>
 
       {/* Footer / Exporter */}
