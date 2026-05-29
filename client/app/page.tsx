@@ -61,34 +61,11 @@ export default function Home() {
           </a>
         </div>
 
-        {/* Right: Actions & Badges */}
+        {/* Right Section: Clean spacer or simple profile placeholder */}
         <div className="flex items-center gap-4">
-          {/* Academic Badges */}
-          <div className="hidden lg:flex gap-2">
-            <div className="flex items-center gap-1 bg-[#4edea3]/10 border border-[#4edea3]/30 px-3 py-1 rounded-full">
-              <span className="material-symbols-outlined text-[#4edea3] text-sm">verified</span>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-[#4edea3]">
-                TS EN 206 Active
-              </span>
-            </div>
-            <div className="flex items-center gap-1 bg-[#89ceff]/10 border border-[#89ceff]/30 px-3 py-1 rounded-full">
-              <span className="material-symbols-outlined text-[#89ceff] text-sm">school</span>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-[#89ceff]">
-                MÜDEK Standard
-              </span>
-            </div>
+          <div className="w-8 h-8 rounded-full bg-[#1d2022] border border-white/5 flex items-center justify-center text-xs text-[#c6c6cc]">
+            EM
           </div>
-
-          {/* Action Icons */}
-          <button className="p-1.5 rounded-full hover:bg-white/5 transition-colors text-[#c6c6cc] hover:text-white cursor-pointer">
-            <span className="material-symbols-outlined">notifications</span>
-          </button>
-          <button className="p-1.5 rounded-full hover:bg-white/5 transition-colors text-[#c6c6cc] hover:text-white cursor-pointer">
-            <span className="material-symbols-outlined">settings</span>
-          </button>
-          <button className="hidden md:block bg-[#4edea3] text-[#003824] px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-[#4edea3]/80 transition-colors cursor-pointer">
-            MÜDEK Certified / Onaylı
-          </button>
         </div>
       </nav>
 
