@@ -124,7 +124,7 @@ export default function MixOptimizer() {
       {/* 4-Card Overview KPI Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter w-full">
         {/* Card 1: Carbon Reduction */}
-        <div className="glass-panel p-panel-padding glow-accent flex flex-col gap-stack-sm relative overflow-hidden group">
+        <div className="glass-panel p-panel-padding flex flex-col gap-stack-sm relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-[#4edea3]/10 rounded-full blur-2xl group-hover:bg-[#4edea3]/20 transition-all"></div>
           <div className="flex justify-between items-center z-10">
             <span className="text-label-caps font-label-caps text-on-surface-variant">Carbon Reduction / Karbon Azaltımı</span>
@@ -161,7 +161,7 @@ export default function MixOptimizer() {
         </div>
 
         {/* Card 4: Standard Compliance */}
-        <div className="glass-panel p-panel-padding flex flex-col gap-stack-sm relative overflow-hidden group border-emerald-500/30">
+        <div className="glass-panel p-panel-padding flex flex-col gap-stack-sm relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-[#4edea3]/5 to-transparent z-0"></div>
           <div className="flex justify-between items-center z-10">
             <span className="text-label-caps font-label-caps text-on-surface-variant">Compliance Status / Uyumluluk Durumu</span>
@@ -181,7 +181,7 @@ export default function MixOptimizer() {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start w-full">
         {/* Left Configurator Column */}
         <div className="lg:col-span-4 flex flex-col gap-gutter w-full">
-          <div className="glass-panel p-panel-padding glow-accent">
+          <div className="glass-panel p-panel-padding">
             <h2 className="text-title-sm font-title-sm text-on-surface mb-stack-md flex items-center gap-2">
               <span className="material-symbols-outlined text-[#4edea3]">tune</span>
               Mix Parameters / Karışım Parametreleri
@@ -311,7 +311,7 @@ export default function MixOptimizer() {
         {/* Right Analytics Column */}
         <div className="lg:col-span-8 flex flex-col gap-gutter w-full">
           {/* TS EN 206 Compliance panel */}
-          <div className="glass-panel p-panel-padding flex flex-col md:flex-row gap-stack-md justify-between items-center border-l-4 border-[#4edea3] border-t-0 border-r-0 border-b-0">
+          <div className="glass-panel p-panel-padding flex flex-col md:flex-row gap-stack-md justify-between items-center">
             <div className="flex flex-col">
               <h3 className="text-title-sm font-title-sm text-on-surface">TS EN 206 Parameters / Parametreleri</h3>
               <span className="text-label-caps font-label-caps text-on-surface-variant">Exposure Class / Maruz Kalma: XC3, XF1</span>

@@ -72,7 +72,7 @@ export default function Home() {
       {/* Main Content Layout Container */}
       <main className="flex-grow p-8 max-w-[1600px] mx-auto w-full flex flex-col gap-gutter">
         {/* Core Bilingual Explanation Section */}
-        <section className="glass-panel p-6 border border-white/5 bg-[#1d2022]/20 relative overflow-hidden">
+        <section className="glass-panel p-panel-padding relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 text-[#4edea3]/10">
             <span className="material-symbols-outlined text-[64px]">science</span>
           </div>
