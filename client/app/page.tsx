@@ -23,9 +23,6 @@ export default function Home() {
               <span className="text-2xl font-black tracking-tighter text-[#89ceff] uppercase drop-shadow-[0_0_8px_rgba(137,206,255,0.5)]">
                 EcoMix
               </span>
-              <span className="bg-[#4edea3]/20 text-[#4edea3] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#4edea3]/30">
-                Optimizer
-              </span>
             </div>
             <span className="text-[10px] font-bold text-[#c6c6cc] mt-0.5 tracking-wider">
               Concrete Chemistry & Sustainability Engine / Beton Kimyası ve Sürdürülebilirlik Motoru
