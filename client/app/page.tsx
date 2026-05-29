@@ -77,11 +77,8 @@ export default function Home() {
             <span className="material-symbols-outlined text-[64px]">science</span>
           </div>
           <div className="max-w-4xl space-y-2">
-            <h2 className="text-lg font-black text-[#e0e3e5] flex items-center gap-2">
+            <h2 className="text-lg font-black text-[#e0e3e5]">
               <span>Constrained Concrete Mixture Optimization / Beton Karışım Optimizasyonu</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 bg-[#89ceff]/15 text-[#89ceff] rounded">
-                Interdisciplinary Synergy / Disiplinlerarası Sinerji
-              </span>
             </h2>
             <p className="text-xs text-[#c6c6cc] leading-relaxed">
               <strong>EcoMix Optimizer</strong> represents an academic engineering milestone, balancing software mathematical optimizations 
