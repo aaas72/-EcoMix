@@ -353,6 +353,7 @@ export default function MixOptimizer() {
                 </ResponsiveContainer>
               </div>
             </div>
+          </div>
           {/* 4-Card Overview KPI Grid (Placed inside Right Column to keep Left Column sticky!) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-gutter w-full mt-2">
             <KPICard
