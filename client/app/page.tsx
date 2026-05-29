@@ -1,85 +1,134 @@
 import React from 'react';
-import { Shield, Sparkles, Cpu, Award } from 'lucide-react';
 import MixOptimizer from '@/components/MixOptimizer';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#090d16] relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-[#101415] relative overflow-hidden">
       {/* Background neon gradients */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[55%] h-[55%] rounded-full bg-sky-500/5 blur-[120px] pointer-events-none" />
 
-      {/* Header section */}
-      <header className="border-b border-slate-900 bg-slate-950/40 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-emerald-400">
-              <Cpu className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-xl font-black text-slate-100 tracking-tight flex items-center gap-1.5">
-                <span>EcoMix</span>
-                <span className="text-xs font-bold px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-md">
-                  Optimizer
-                </span>
-              </h1>
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mt-0.5">
-                Concrete Chemistry & Sustainability Engine
-              </p>
-            </div>
-          </div>
+      {/* Google Material Symbols and Styles */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet"
+      />
 
-          <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-400">
-              <Award className="w-3.5 h-3.5 text-amber-500" />
-              <span>مطابق لمعايير جودة الاعتماد الأكاديمي (MÜDEK)</span>
+      {/* TopAppBar */}
+      <nav className="bg-[#1d2022]/60 backdrop-blur-md top-0 border-b border-white/10 flex justify-between items-center px-6 py-2 w-full z-50 sticky">
+        {/* Left: Brand */}
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-black tracking-tighter text-[#89ceff] uppercase drop-shadow-[0_0_8px_rgba(137,206,255,0.5)]">
+                EcoMix
+              </span>
+              <span className="bg-[#4edea3]/20 text-[#4edea3] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#4edea3]/30">
+                Optimizer
+              </span>
             </div>
-            <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl">
-              <Shield className="w-4 h-4" />
-              <span>TS EN 206 Active</span>
-            </div>
+            <span className="text-[10px] font-bold text-[#c6c6cc] mt-0.5 tracking-wider">
+              Concrete Chemistry & Sustainability Engine / Beton Kimyası ve Sürdürülebilirlik Motoru
+            </span>
           </div>
         </div>
-      </header>
 
-      {/* Main Layout container */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-6 py-10 space-y-10">
-        {/* Academic Synergy Presentation */}
-        <section className="glass-panel p-6 rounded-2xl border border-slate-800 bg-slate-950/20 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-3 text-emerald-500/20">
-            <Sparkles className="w-20 h-20" />
+        {/* Center: Navigation Links */}
+        <div className="hidden md:flex items-center gap-6">
+          <a
+            className="text-[#4edea3] font-bold border-b-2 border-[#4edea3] pb-1 text-sm hover:text-white transition-colors duration-300"
+            href="#"
+          >
+            Dashboard / Panel
+          </a>
+          <a
+            className="text-[#c6c6cc] text-sm hover:text-white transition-colors duration-300"
+            href="#"
+          >
+            Analytics / Analiz
+          </a>
+          <a
+            className="text-[#c6c6cc] text-sm hover:text-white transition-colors duration-300"
+            href="#"
+          >
+            Compliance / Uyumluluk
+          </a>
+          <a
+            className="text-[#c6c6cc] text-sm hover:text-white transition-colors duration-300"
+            href="#"
+          >
+            Reports / Raporlar
+          </a>
+        </div>
+
+        {/* Right: Actions & Badges */}
+        <div className="flex items-center gap-4">
+          {/* Academic Badges */}
+          <div className="hidden lg:flex gap-2">
+            <div className="flex items-center gap-1 bg-[#4edea3]/10 border border-[#4edea3]/30 px-3 py-1 rounded-full">
+              <span className="material-symbols-outlined text-[#4edea3] text-sm">verified</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-[#4edea3]">
+                TS EN 206 Active
+              </span>
+            </div>
+            <div className="flex items-center gap-1 bg-[#89ceff]/10 border border-[#89ceff]/30 px-3 py-1 rounded-full">
+              <span className="material-symbols-outlined text-[#89ceff] text-sm">school</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-[#89ceff]">
+                MÜDEK Standard
+              </span>
+            </div>
           </div>
-          <div className="max-w-3xl space-y-2">
-            <h2 className="text-xl font-black text-slate-200 flex items-center gap-2">
-              <span>التكامل المعرفي بين هندسة البرمجيات والهندسة المدنية</span>
-              <span className="text-xs font-bold px-2 py-0.5 bg-sky-500/15 text-sky-400 rounded">
-                Interdisciplinary Synergy
+
+          {/* Action Icons */}
+          <button className="p-1.5 rounded-full hover:bg-white/5 transition-colors text-[#c6c6cc] hover:text-white cursor-pointer">
+            <span className="material-symbols-outlined">notifications</span>
+          </button>
+          <button className="p-1.5 rounded-full hover:bg-white/5 transition-colors text-[#c6c6cc] hover:text-white cursor-pointer">
+            <span className="material-symbols-outlined">settings</span>
+          </button>
+          <button className="hidden md:block bg-[#4edea3] text-[#003824] px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-[#4edea3]/80 transition-colors cursor-pointer">
+            MÜDEK Certified / Onaylı
+          </button>
+        </div>
+      </nav>
+
+      {/* Main Content Layout Container */}
+      <main className="flex-grow p-8 max-w-[1600px] mx-auto w-full flex flex-col gap-gutter">
+        {/* Core Bilingual Explanation Section */}
+        <section className="glass-panel p-6 border border-white/5 bg-[#1d2022]/20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 text-[#4edea3]/10">
+            <span className="material-symbols-outlined text-[64px]">science</span>
+          </div>
+          <div className="max-w-4xl space-y-2">
+            <h2 className="text-lg font-black text-[#e0e3e5] flex items-center gap-2">
+              <span>Constrained Concrete Mixture Optimization / Beton Karışım Optimizasyonu</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 bg-[#89ceff]/15 text-[#89ceff] rounded">
+                Interdisciplinary Synergy / Disiplinlerarası Sinerji
               </span>
             </h2>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              يقدم مشروع <strong>EcoMix Optimizer</strong> نموذجاً ذكياً لحل مسألة تحسين الخواص الإنشائية والبيئية
-              للخرسانة. من خلال صياغة العلاقات الرياضية لكفاءة استبدال المواد الإسمنتية بمخلفات صديقة للبيئة (الرماد المتطاير،
-              خبث أفران الحديد، غبار السيليكا)، نضمن مطابقة رتب الخرسانة (<strong className="text-emerald-400 font-semibold">C30 / C35</strong>) بالكامل لمعيار{' '}
-              <strong className="text-sky-400 font-semibold">TS EN 206</strong> مع خفض البصمة الكربونية والميزانية بنسب قياسية.
+            <p className="text-xs text-[#c6c6cc] leading-relaxed">
+              <strong>EcoMix Optimizer</strong> represents an academic engineering milestone, balancing software mathematical optimizations 
+              with civil structural constraints. Through Bolomey calculations and eco-substitute k-factors, it optimizes mixtures 
+              for strength requirements (<strong className="text-[#4edea3]">C25 to C40</strong>) under standard{' '}
+              <strong className="text-[#89ceff]">TS EN 206</strong> durabilities, minimizing cost and carbon footprint in real-time.
+            </p>
+            <p className="text-[11px] text-slate-500 italic">
+              * EcoMix Optimizer, yazılım matematiksel optimizasyonları ile inşaat yapısal kısıtlamalarını dengeleyen akademik bir mühendislik kilometre taşıdır.
             </p>
           </div>
         </section>
 
-        {/* Core Optimizer Engine Dashboard */}
-        <section className="space-y-4">
-          <div className="flex justify-between items-end">
-            <div>
-              <h3 className="text-lg font-black text-slate-200">لوحة التحكم في الخلطة الذكية</h3>
-              <p className="text-xs text-slate-500">عدل أسعار السوق وفئة المقاومة لمشاهدة التحسين الرياضي الفوري</p>
-            </div>
-          </div>
+        {/* Dashboard Grid Panel */}
+        <section className="w-full">
           <MixOptimizer />
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/20 py-6 text-center text-xs text-slate-500">
-        <p>© {new Date().getFullYear()} EcoMix Optimizer. Built for Academic Accreditation (MÜDEK Excellence Standard).</p>
+      <footer className="border-t border-white/5 bg-[#0b0f10]/40 py-6 text-center text-[10px] text-slate-500">
+        <p>
+          © {new Date().getFullYear()} EcoMix Optimizer. Designed for Academic Accreditation & MÜDEK Excellence Criteria / MÜDEK Mükemmeliyet Kriterleri.
+        </p>
       </footer>
     </div>
   );

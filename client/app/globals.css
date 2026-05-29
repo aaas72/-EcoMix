@@ -1,19 +1,49 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-emerald: #10b981;
-  --color-primary-emerald-hover: #059669;
-  --color-accent-teal: #14b8a6;
-  --color-accent-blue: #0ea5e9;
-  --color-accent-amber: #f59e0b;
-  --color-dark-slate: #090d16;
-  --color-dark-card: rgba(15, 23, 42, 0.45);
+  --color-primary: #c3c6d2;
+  --color-secondary: #4edea3;
+  --color-secondary-fixed-dim: #4edea3;
+  --color-tertiary: #89ceff;
+  --color-tertiary-fixed-dim: #89ceff;
+  --color-tertiary-fixed: #c9e6ff;
+  --color-background: #101415;
+  
+  --color-surface-container: #1d2022;
+  --color-surface-container-high: #272a2c;
+  --color-surface-container-highest: #323537;
+  --color-surface-container-low: #191c1e;
+  --color-surface-container-lowest: #0b0f10;
+  
+  --color-on-surface: #e0e3e5;
+  --color-on-surface-variant: #c6c6cc;
+  --color-on-secondary: #003824;
+  --color-on-secondary-fixed-variant: #005236;
+  --color-on-primary-container: #767a85;
+  --color-outline: #909096;
+
+  /* Custom Spacing tokens for Tailwind v4 to resolve utility margins and paddings */
+  --spacing-panel-padding: 24px;
+  --spacing-stack-sm: 8px;
+  --spacing-stack-md: 16px;
+  --spacing-stack-lg: 32px;
+  --spacing-gutter: 24px;
+  --spacing-container-margin: 32px;
+
+  /* Custom Font-size tokens for Tailwind v4 */
+  --text-display-xl-mobile: 40px;
+  --text-body-md: 16px;
+  --text-headline-md: 24px;
+  --text-title-sm: 18px;
+  --text-display-xl: 64px;
+  --text-display-lg: 48px;
+  --text-label-caps: 12px;
 }
 
 body {
-  background-color: #090d16;
-  color: #f1f5f9;
-  font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  background-color: #101415;
+  color: #e0e3e5;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
 }
 
@@ -24,27 +54,40 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #0b0f10;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #323537;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #909096;
 }
 
-/* Glassmorphism custom styling */
+/* Glassmorphism custom styling matching designer specification */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(25, 28, 30, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  transition: all 0.3s ease-out;
 }
 
-.glass-panel-hover:hover {
-  border-color: rgba(16, 185, 129, 0.25);
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.08);
+.glass-panel:hover {
+  background-color: rgba(25, 28, 30, 0.65);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.glow-accent {
+  box-shadow: inset 2px 2px 0px 0px rgba(137, 206, 255, 0.2);
+}
+
+.chart-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
