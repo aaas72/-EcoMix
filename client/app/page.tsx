@@ -40,9 +40,6 @@ function DashboardContent() {
             <p className="text-xs text-[#c6c6cc] leading-relaxed">
               {t('academicIntro')}
             </p>
-            <p className="text-[11px] text-slate-500 italic">
-              {t('academicIntroSub')}
-            </p>
           </div>
         </section>
 
