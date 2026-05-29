@@ -310,51 +310,7 @@ export default function MixOptimizer() {
             </div>
           </div>
 
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-            <div className="glass-panel p-panel-padding flex flex-col min-h-[300px]">
-              <h3 className="text-title-sm font-title-sm text-on-surface mb-stack-md">
-                {t('chartCarbonTitle')}
-              </h3>
-              <div className="h-64 mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={weightChartData}>
-                    <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
-                    <YAxis stroke="#64748b" fontSize={11} />
-                    <ReChartsTooltip
-                      cursor={false}
-                      contentStyle={{
-                        backgroundColor: '#101415',
-                        borderColor: '#272a2c',
-                        color: '#e0e3e5',
-                      }}
-                    />
-                    <Bar dataKey="OPC" fill="#323537" radius={[4, 4, 0, 0]} name={t('opcStandard') as string} />
-                    <Bar dataKey="EcoMix" fill="#4edea3" radius={[4, 4, 0, 0]} name={t('ecomixOpt') as string} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="glass-panel p-panel-padding flex flex-col min-h-[300px]">
-              <h3 className="text-title-sm font-title-sm text-on-surface mb-stack-md">
-                {t('chartRadarTitle')}
-              </h3>
-              <div className="h-64 mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarChartData}>
-                    <PolarGrid stroke="#323537" />
-                    <PolarAngleAxis dataKey="subject" stroke="#c6c6cc" fontSize={9} />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#272a2c" tick={false} />
-                    <Radar name={t('opcStandard') as string} dataKey="OPC" stroke="#45474b" fill="#45474b" fillOpacity={0.15} />
-                    <Radar name={t('ecomixOpt') as string} dataKey="EcoMix" stroke="#4edea3" fill="#4edea3" fillOpacity={0.3} />
-                    <Legend wrapperStyle={{ fontSize: 11 }} />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-          {/* 4-Card Overview KPI Grid (Placed inside Right Column to keep Left Column sticky!) */}
+          {/* 4-Card Overview KPI Grid (Placed right below Compliance Panel for immediate feedback!) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-gutter w-full mt-2">
             <KPICard
               label={t('carbonRed')}
@@ -385,6 +341,51 @@ export default function MixOptimizer() {
               glowColor="#4edea3"
               footer={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
             />
+          </div>
+
+          {/* Charts Row (Emissions and Radar Chart placed at the bottom as detailed analysis!) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter mt-2">
+            <div className="glass-panel p-panel-padding flex flex-col min-h-[220px]">
+              <h3 className="text-title-sm font-title-sm text-on-surface mb-stack-sm">
+                {t('chartCarbonTitle')}
+              </h3>
+              <div className="h-44 mt-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={weightChartData}>
+                    <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
+                    <YAxis stroke="#64748b" fontSize={11} />
+                    <ReChartsTooltip
+                      cursor={false}
+                      contentStyle={{
+                        backgroundColor: '#101415',
+                        borderColor: '#272a2c',
+                        color: '#e0e3e5',
+                      }}
+                    />
+                    <Bar dataKey="OPC" fill="#323537" radius={[4, 4, 0, 0]} name={t('opcStandard') as string} />
+                    <Bar dataKey="EcoMix" fill="#4edea3" radius={[4, 4, 0, 0]} name={t('ecomixOpt') as string} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="glass-panel p-panel-padding flex flex-col min-h-[220px]">
+              <h3 className="text-title-sm font-title-sm text-on-surface mb-stack-sm">
+                {t('chartRadarTitle')}
+              </h3>
+              <div className="h-44 mt-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarChartData}>
+                    <PolarGrid stroke="#323537" />
+                    <PolarAngleAxis dataKey="subject" stroke="#c6c6cc" fontSize={9} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#272a2c" tick={false} />
+                    <Radar name={t('opcStandard') as string} dataKey="OPC" stroke="#45474b" fill="#45474b" fillOpacity={0.15} />
+                    <Radar name={t('ecomixOpt') as string} dataKey="EcoMix" stroke="#4edea3" fill="#4edea3" fillOpacity={0.3} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
 
           {/* Footer / Exporter (Moved inside Right Column to keep Left Column sticky for the entire system height!) */}

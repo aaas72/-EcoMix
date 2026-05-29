@@ -100,7 +100,7 @@ export default function PDFExporter({
               <p className="text-xs text-slate-600 mt-1 font-bold uppercase tracking-wider">
                 {t('subtitle')}
               </p>
-              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">MÜDEK & TS EN 206 Academic Integration Framework</p>
+              <p className="text-[11px] text-slate-500 mt-0.5 font-medium">TS EN 206 Academic Integration Framework</p>
             </div>
             <div className="text-right">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 border border-slate-800 rounded text-slate-800 font-bold text-xs uppercase mb-2">

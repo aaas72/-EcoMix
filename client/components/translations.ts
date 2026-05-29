@@ -53,12 +53,12 @@ export const translations = {
 
     // Footer
     accreditationTitle: "Academic Accreditation Panel",
-    accreditationDesc: "Mix design meets structural integrity requirements per TS EN 206. Ready for academic review and MÜDEK compliance logging.",
+    accreditationDesc: "Mix design meets structural integrity requirements per TS EN 206. Ready for academic review and compliance logging.",
     exportPdf: "Export Certified PDF",
 
     // PDF specific
     pdfTitle: "OFFICIAL CONCRETE MIX DESIGN CERTIFICATE",
-    pdfSub: "TS EN 206 COMPLIANCE & MÜDEK ACCREDITATION LOG",
+    pdfSub: "TS EN 206 COMPLIANCE & ACCREDITATION LOG",
     pdfDetails: "Design Parameters",
     pdfProportions: "Optimized Material Proportions (per 1 m³)",
     pdfWater: "Water (Su)",
@@ -141,12 +141,12 @@ export const translations = {
 
     // Footer
     accreditationTitle: "Akademik Akreditasyon Paneli",
-    accreditationDesc: "Karışım tasarımı TS EN 206 yapısal bütünlük gereksinimlerini karşılamaktadır. Akademik inceleme ve MÜDEK uyumluluk kaydı için hazırdır.",
+    accreditationDesc: "Karışım tasarımı TS EN 206 yapısal bütünlük gereksinimlerini karşılamaktadır. Akademik inceleme ve uyumluluk kaydı için hazırdır.",
     exportPdf: "Onaylı PDF Dışa Aktar",
 
     // PDF specific
     pdfTitle: "RESMİ BETON KARIŞIM TASARIM SERTİFİKASI",
-    pdfSub: "TS EN 206 UYUMLULUK VE MÜDEK AKREDİTASYON KAYDI",
+    pdfSub: "TS EN 206 UYUMLULUK VE AKREDİTASYON KAYDI",
     pdfDetails: "Tasarım Parametreleri",
     pdfProportions: "Optimize Edilmiş Malzeme Oranları (1 m³ için)",
     pdfWater: "Su",
