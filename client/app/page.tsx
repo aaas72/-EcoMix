@@ -10,10 +10,12 @@ function DashboardContent() {
   const { t } = useLanguage();
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#101415] relative overflow-hidden">
-      {/* Background neon gradients */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[55%] h-[55%] rounded-full bg-sky-500/5 blur-[120px] pointer-events-none" />
+    <div className="flex flex-col min-h-screen bg-[#101415] relative">
+      {/* Background neon gradients wrapped to preserve position: sticky scrolling context */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/5 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[55%] h-[55%] rounded-full bg-sky-500/5 blur-[120px]" />
+      </div>
 
       {/* Google Material Symbols and Styles */}
       <link
