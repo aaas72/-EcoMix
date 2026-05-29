@@ -81,7 +81,7 @@ export default function PDFExporter({
     <div>
       <button
         onClick={handleExportPDF}
-        className="flex items-center justify-center gap-2 px-6 py-4 bg-emerald-400 hover:bg-emerald-500 active:scale-95 transition-all text-emerald-950 font-bold rounded-xl cursor-pointer shadow-[0_4px_20px_rgba(78,222,163,0.2)] group"
+        className="flex items-center justify-center gap-2 px-6 py-4 bg-emerald-400 hover:bg-emerald-500 active:scale-95 transition-all text-emerald-950 font-bold rounded-xl cursor-pointer group"
       >
         <Download className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
         <span>{t('exportPdf')}</span>

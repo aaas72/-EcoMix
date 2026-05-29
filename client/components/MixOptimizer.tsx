@@ -158,7 +158,7 @@ export default function MixOptimizer() {
                     onClick={() => setStrengthClass(cls)}
                     className={`flex-1 py-1.5 text-body-md font-body-md rounded-md transition-all cursor-pointer ${
                       strengthClass === cls
-                        ? 'bg-[#191c1e] text-[#4edea3] border border-[#4edea3]/30 shadow-[0_0_10px_rgba(78,222,163,0.1)] font-semibold'
+                        ? 'bg-[#191c1e] text-[#4edea3] border border-[#4edea3]/30 font-semibold'
                         : 'text-on-surface-variant hover:text-on-surface'
                     }`}
                   >

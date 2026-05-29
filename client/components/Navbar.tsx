@@ -29,7 +29,7 @@ export default function Navbar() {
         {/* Language selector button */}
         <button
           onClick={toggleLanguage}
-          className="flex items-center gap-1 bg-[#1d2022] hover:bg-[#323537] active:scale-95 border border-white/10 rounded-full px-3 py-1 text-xs font-bold text-[#89ceff] transition-all cursor-pointer shadow-[0_0_10px_rgba(137,206,255,0.05)]"
+          className="flex items-center gap-1 bg-[#1d2022] hover:bg-[#323537] active:scale-95 border border-white/10 rounded-full px-3 py-1 text-xs font-bold text-[#89ceff] transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-[14px]">language</span>
           <span>{language === 'en' ? 'TR' : 'EN'}</span>
