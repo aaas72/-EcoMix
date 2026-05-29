@@ -15,8 +15,10 @@ import {
   PolarRadiusAxis,
   Radar,
 } from 'recharts';
-import GlassCard from './ui/GlassCard';
 import PDFExporter from './PDFExporter';
+import KPICard from './KPICard';
+import PriceSlider from './PriceSlider';
+import ComplianceIndicator from './ComplianceIndicator';
 import {
   optimizeConcreteMix,
   getOpcBenchmark,
@@ -48,9 +50,6 @@ export default function MixOptimizer() {
 
   // Compute live properties
   const optimizedMix = useMemo(() => {
-    // Volume calculation
-    // Density sand = 2650, Gravel = 2700. Average aggregate density = 2680 kg/m^3.
-    // 1m^3 is 1000 liters. Air = 15 liters.
     const usedVol =
       cementWeight / DEFAULT_MATERIALS.cement.density +
       160 / DEFAULT_MATERIALS.water.density +
@@ -65,7 +64,6 @@ export default function MixOptimizer() {
 
     const targetStrengthValue = TARGET_STRENGTHS[strengthClass];
 
-    // Let's run a smart micro-correction solver or run grid optimization directly based on target
     const solved = optimizeConcreteMix({
       strengthClass,
       optimizationPriority: priority,
@@ -97,18 +95,10 @@ export default function MixOptimizer() {
   const carbonReduction = Math.round(((opcMix.carbon - optimizedMix.carbon) / opcMix.carbon) * 100);
   const costSavings = Math.round(((opcMix.cost - optimizedMix.cost) / opcMix.cost) * 100);
 
-  // Charts
+  // Charts data
   const weightChartData = [
-    {
-      name: 'OPC',
-      OPC: opcMix.carbon,
-      EcoMix: 0,
-    },
-    {
-      name: 'EcoMix Opt',
-      OPC: 0,
-      EcoMix: optimizedMix.carbon,
-    },
+    { name: 'OPC', OPC: opcMix.carbon, EcoMix: 0 },
+    { name: 'EcoMix Opt', OPC: 0, EcoMix: optimizedMix.carbon },
   ];
 
   const radarChartData = [
@@ -119,62 +109,45 @@ export default function MixOptimizer() {
     { subject: 'Durability / Dayanıklılık', OPC: 80, EcoMix: optimizedMix.wbRatio <= 0.45 ? 100 : 70 },
   ];
 
+  // TS EN 206 Standards Compliance Flags
+  const isWbCompliant = optimizedMix.wbRatio <= 0.45;
+  const isBinderCompliant = optimizedMix.totalBinder >= 300;
+  const totalReplacementRatio = ((optimizedMix.flyAsh + optimizedMix.slag + optimizedMix.silicaFume) / optimizedMix.totalBinder) * 100;
+  const isReplacementCompliant = totalReplacementRatio <= 75;
+
   return (
     <div className="flex flex-col gap-gutter">
-      {/* 4-Card Overview KPI Grid */}
+      {/* 4-Card Overview KPI Grid (Refactored & Modularized) */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter w-full">
-        {/* Card 1: Carbon Reduction */}
-        <div className="glass-panel p-panel-padding flex flex-col gap-stack-sm relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-[#4edea3]/10 rounded-full blur-2xl group-hover:bg-[#4edea3]/20 transition-all"></div>
-          <div className="flex justify-between items-center z-10">
-            <span className="text-label-caps font-label-caps text-on-surface-variant">Carbon Reduction / Karbon Azaltımı</span>
-            <span className="material-symbols-outlined text-[#4edea3]">eco</span>
-          </div>
-          <div className="text-display-lg font-display-lg text-[#4edea3] z-10">-{carbonReduction}%</div>
-          <div className="text-body-md font-body-md text-on-surface-variant z-10">vs Standard OPC</div>
-        </div>
-
-        {/* Card 2: Cost Savings */}
-        <div className="glass-panel p-panel-padding flex flex-col gap-stack-sm relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-[#89ceff]/10 rounded-full blur-2xl group-hover:bg-[#89ceff]/20 transition-all"></div>
-          <div className="flex justify-between items-center z-10">
-            <span className="text-label-caps font-label-caps text-on-surface-variant">Cost Savings / Maliyet Tasarrufu</span>
-            <span className="material-symbols-outlined text-[#89ceff]">payments</span>
-          </div>
-          <div className="text-display-lg font-display-lg text-[#89ceff] z-10">-{costSavings}%</div>
-          <div className="text-body-md font-body-md text-on-surface-variant z-10">Per Cubic Meter</div>
-        </div>
-
-        {/* Card 3: 28-Day Strength */}
-        <div className="glass-panel p-panel-padding flex flex-col gap-stack-sm relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-[#c9e6ff]/10 rounded-full blur-2xl group-hover:bg-[#c9e6ff]/20 transition-all"></div>
-          <div className="flex justify-between items-center z-10">
-            <span className="text-label-caps font-label-caps text-on-surface-variant">28-Day Strength / 28 Günlük Dayanım</span>
-            <span className="material-symbols-outlined text-[#c9e6ff]">fitness_center</span>
-          </div>
-          <div className="text-display-lg font-display-lg text-on-surface z-10">
-            {optimizedMix.strength} <span className="text-headline-md font-headline-md text-on-surface-variant">MPa</span>
-          </div>
-          <div className="text-body-md font-body-md text-on-surface-variant z-10">
-            Target: {TARGET_STRENGTHS[strengthClass]} MPa
-          </div>
-        </div>
-
-        {/* Card 4: Standard Compliance */}
-        <div className="glass-panel p-panel-padding flex flex-col gap-stack-sm relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#4edea3]/5 to-transparent z-0"></div>
-          <div className="flex justify-between items-center z-10">
-            <span className="text-label-caps font-label-caps text-on-surface-variant">Compliance Status / Uyumluluk Durumu</span>
-            <span className="material-symbols-outlined text-[#4edea3]">verified</span>
-          </div>
-          <div className="text-headline-md font-headline-md text-[#4edea3] leading-tight z-10 mt-2">
-            Fully Compliant<br />
-            <span className="text-title-sm font-title-sm text-[#4edea3]/70">Tam Uyumlu</span>
-          </div>
-          <div className="text-label-caps font-label-caps text-[#89ceff] z-10 mt-auto pt-2 border-t border-white/10">
-            TS EN 206 Validated
-          </div>
-        </div>
+        <KPICard
+          label="Carbon Reduction / Karbon Azaltımı"
+          icon="eco"
+          metric={`-${carbonReduction}%`}
+          caption="vs Standard OPC"
+          glowColor="#4edea3"
+        />
+        <KPICard
+          label="Cost Savings / Maliyet Tasarrufu"
+          icon="payments"
+          metric={`-${costSavings}%`}
+          caption="Per Cubic Meter"
+          glowColor="#89ceff"
+        />
+        <KPICard
+          label="28-Day Strength / 28 Günlük Dayanım"
+          icon="fitness_center"
+          metric={`${optimizedMix.strength} MPa`}
+          caption={`Target: ${TARGET_STRENGTHS[strengthClass]} MPa`}
+          glowColor="#c9e6ff"
+        />
+        <KPICard
+          label="Compliance Status / Uyumluluk Durumu"
+          icon="verified"
+          metric="Fully Compliant"
+          caption="TS EN 206 Validated"
+          glowColor="#4edea3"
+          footer="Tam Uyumlu"
+        />
       </section>
 
       {/* Main 2-Column Grid */}
@@ -231,86 +204,51 @@ export default function MixOptimizer() {
               </div>
             </div>
 
-            {/* Sliders */}
+            {/* Sliders (Refactored & Modularized) */}
             <div className="flex flex-col gap-stack-md">
-              {/* CEM I */}
-              <div className="group">
-                <div className="flex justify-between items-end mb-1">
-                  <label className="text-label-caps font-label-caps text-on-surface">CEM I (Portland)</label>
-                  <span className="bg-[#323537] px-2 py-0.5 rounded text-label-caps font-label-caps text-on-surface font-mono">
-                    {cementWeight} kg
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="100"
-                  max="400"
-                  value={cementWeight}
-                  onChange={(e) => setCementWeight(parseInt(e.target.value))}
-                  className="w-full h-1 bg-[#323537] rounded-lg appearance-none cursor-pointer accent-[#4edea3]"
-                />
-              </div>
-
-              {/* Fly Ash */}
-              <div className="group">
-                <div className="flex justify-between items-end mb-1">
-                  <label className="text-label-caps font-label-caps text-on-surface">Fly Ash (Uçucu Kül)</label>
-                  <span className="bg-[#323537] px-2 py-0.5 rounded text-label-caps font-label-caps text-[#89ceff] font-mono">
-                    {flyAshWeight} kg
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="200"
-                  value={flyAshWeight}
-                  onChange={(e) => setFlyAshWeight(parseInt(e.target.value))}
-                  className="w-full h-1 bg-[#323537] rounded-lg appearance-none cursor-pointer accent-[#89ceff]"
-                />
-              </div>
-
-              {/* GGBS Slag */}
-              <div className="group">
-                <div className="flex justify-between items-end mb-1">
-                  <label className="text-label-caps font-label-caps text-on-surface">GGBS (Cüruf)</label>
-                  <span className="bg-[#323537] px-2 py-0.5 rounded text-label-caps font-label-caps text-[#89ceff] font-mono">
-                    {slagWeight} kg
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="200"
-                  value={slagWeight}
-                  onChange={(e) => setSlagWeight(parseInt(e.target.value))}
-                  className="w-full h-1 bg-[#323537] rounded-lg appearance-none cursor-pointer accent-[#89ceff]"
-                />
-              </div>
-
-              {/* Silica Fume */}
-              <div className="group">
-                <div className="flex justify-between items-end mb-1">
-                  <label className="text-label-caps font-label-caps text-on-surface">Silica Fume (Silis Dumanı)</label>
-                  <span className="bg-[#323537] px-2 py-0.5 rounded text-label-caps font-label-caps text-on-surface-variant font-mono">
-                    {silicaFumeWeight} kg
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="50"
-                  value={silicaFumeWeight}
-                  onChange={(e) => setSilicaFumeWeight(parseInt(e.target.value))}
-                  className="w-full h-1 bg-[#323537] rounded-lg appearance-none cursor-pointer accent-[#909096]"
-                />
-              </div>
+              <PriceSlider
+                label="CEM I (Portland)"
+                value={cementWeight}
+                min={100}
+                max={400}
+                accentColorClass="accent-[#4edea3]"
+                textColorClass="text-on-surface"
+                onChange={setCementWeight}
+              />
+              <PriceSlider
+                label="Fly Ash (Uçucu Kül)"
+                value={flyAshWeight}
+                min={0}
+                max={200}
+                accentColorClass="accent-[#89ceff]"
+                textColorClass="text-[#89ceff]"
+                onChange={setFlyAshWeight}
+              />
+              <PriceSlider
+                label="GGBS (Cüruf)"
+                value={slagWeight}
+                min={0}
+                max={200}
+                accentColorClass="accent-[#89ceff]"
+                textColorClass="text-[#89ceff]"
+                onChange={setSlagWeight}
+              />
+              <PriceSlider
+                label="Silica Fume (Silis Dumanı)"
+                value={silicaFumeWeight}
+                min={0}
+                max={50}
+                accentColorClass="accent-[#909096]"
+                textColorClass="text-on-surface-variant"
+                onChange={setSilicaFumeWeight}
+              />
             </div>
           </div>
         </div>
 
         {/* Right Analytics Column */}
         <div className="lg:col-span-8 flex flex-col gap-gutter w-full">
-          {/* TS EN 206 Compliance panel */}
+          {/* TS EN 206 Compliance panel (Refactored & Modularized) */}
           <div className="glass-panel p-panel-padding flex flex-col md:flex-row gap-stack-md justify-between items-center">
             <div className="flex flex-col">
               <h3 className="text-title-sm font-title-sm text-on-surface">TS EN 206 Parameters / Parametreleri</h3>
@@ -318,36 +256,32 @@ export default function MixOptimizer() {
             </div>
 
             <div className="flex gap-stack-lg">
-              <div className="flex flex-col items-center">
-                <span className={`text-headline-md font-headline-md ${optimizedMix.wbRatio <= 0.45 ? 'text-[#4edea3]' : 'text-amber-500'}`}>
-                  {optimizedMix.wbRatio}
-                </span>
-                <span className="text-label-caps font-label-caps text-on-surface-variant uppercase">W/B Ratio / Su-Bağlayıcı</span>
-              </div>
-
-              <div className="w-px bg-white/10 h-10"></div>
-
-              <div className="flex flex-col items-center">
-                <span className={`text-headline-md font-headline-md ${optimizedMix.totalBinder >= 300 ? 'text-on-surface' : 'text-amber-500'}`}>
-                  {optimizedMix.totalBinder}<span className="text-title-sm font-title-sm text-on-surface-variant ml-1">kg</span>
-                </span>
-                <span className="text-label-caps font-label-caps text-on-surface-variant uppercase">Total Binder / Bağlayıcı</span>
-              </div>
-
-              <div className="w-px bg-white/10 h-10"></div>
-
-              <div className="flex flex-col items-center">
-                <span className="text-headline-md font-headline-md text-[#89ceff]">
-                  {Math.round(((optimizedMix.flyAsh + optimizedMix.slag + optimizedMix.silicaFume) / optimizedMix.totalBinder) * 100) || 0}%
-                </span>
-                <span className="text-label-caps font-label-caps text-on-surface-variant uppercase">Replacement / İkame</span>
-              </div>
+              <ComplianceIndicator
+                value={optimizedMix.wbRatio}
+                label="W/B Ratio / Su-Bağlayıcı"
+                limitLabel="Max Limit / Azami Limit: 0.45"
+                isCompliant={isWbCompliant}
+              />
+              <div className="w-px bg-white/10 h-10 align-middle self-center"></div>
+              <ComplianceIndicator
+                value={`${optimizedMix.totalBinder} kg`}
+                label="Total Binder / Bağlayıcı"
+                limitLabel="Min Limit / Asgari Limit: 300 kg"
+                isCompliant={isBinderCompliant}
+              />
+              <div className="w-px bg-white/10 h-10 align-middle self-center"></div>
+              <ComplianceIndicator
+                value={`${Math.round(totalReplacementRatio)}%`}
+                label="Replacement / İkame"
+                limitLabel="Max Limit / Azami Limit: 75%"
+                isCompliant={isReplacementCompliant}
+                isAccentBlue={true}
+              />
             </div>
           </div>
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-            {/* Comparative Bar Chart */}
             <div className="glass-panel p-panel-padding flex flex-col min-h-[300px]">
               <h3 className="text-title-sm font-title-sm text-on-surface mb-stack-md">
                 Emissions vs Standard / Karbon Karşılaştırması (kg CO₂e/m³)
@@ -371,7 +305,6 @@ export default function MixOptimizer() {
               </div>
             </div>
 
-            {/* Radar Web Diagram */}
             <div className="glass-panel p-panel-padding flex flex-col min-h-[300px]">
               <h3 className="text-title-sm font-title-sm text-on-surface mb-stack-md">
                 Performance Matrix / Performans Matrisi
