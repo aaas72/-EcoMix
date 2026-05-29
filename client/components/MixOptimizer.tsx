@@ -386,37 +386,37 @@ export default function MixOptimizer() {
               footer={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
             />
           </div>
+
+          {/* Footer / Exporter (Moved inside Right Column to keep Left Column sticky for the entire system height!) */}
+          <footer className="glass-panel p-panel-padding mt-gutter relative overflow-hidden flex flex-col md:flex-row justify-between items-center bg-[#0b0f10]/80 border-t border-white/10 w-full z-10">
+            <div className="absolute left-0 bottom-0 w-1/2 h-full bg-gradient-to-r from-[#4edea3]/5 to-transparent pointer-events-none"></div>
+            <div className="flex items-center gap-stack-lg z-10 w-full md:w-auto mb-stack-md md:mb-0">
+              {/* Rotatable Circular Digital Stamp */}
+              <div className="relative w-20 h-20 flex items-center justify-center transform rotate-6 border border-[#4edea3]/20 rounded-full bg-[#1d2022]">
+                <div className="absolute inset-1 border border-dashed border-[#4edea3]/40 rounded-full animate-[spin_60s_linear_infinite]"></div>
+                <div className="text-center select-none">
+                  <span className="material-symbols-outlined text-[#4edea3] block text-[24px] mb-0.5">verified</span>
+                  <span className="text-[7px] font-bold text-[#4edea3] uppercase block leading-tight">TS EN 206<br />VALID</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <h4 className="text-title-sm font-title-sm text-on-surface">{t('accreditationTitle')}</h4>
+                <p className="text-body-md font-body-md text-on-surface-variant max-w-md">
+                  {t('accreditationDesc')}
+                </p>
+              </div>
+            </div>
+            <PDFExporter
+              optimizedMix={optimizedMix}
+              opcMix={opcMix}
+              targetClass={strengthClass}
+              priority={priority}
+              prices={prices}
+            />
+          </footer>
         </div>
       </section>
-
-      {/* Footer / Exporter */}
-      <footer className="glass-panel p-panel-padding mt-gutter relative overflow-hidden flex flex-col md:flex-row justify-between items-center bg-[#0b0f10]/80 border-t border-white/10">
-        <div className="absolute left-0 bottom-0 w-1/2 h-full bg-gradient-to-r from-[#4edea3]/5 to-transparent pointer-events-none"></div>
-        <div className="flex items-center gap-stack-lg z-10 w-full md:w-auto mb-stack-md md:mb-0">
-          {/* Rotatable Circular Digital Stamp */}
-          <div className="relative w-20 h-20 flex items-center justify-center transform rotate-6 border border-[#4edea3]/20 rounded-full bg-[#1d2022]">
-            <div className="absolute inset-1 border border-dashed border-[#4edea3]/40 rounded-full animate-[spin_60s_linear_infinite]"></div>
-            <div className="text-center select-none">
-              <span className="material-symbols-outlined text-[#4edea3] block text-[24px] mb-0.5">verified</span>
-              <span className="text-[7px] font-bold text-[#4edea3] uppercase block leading-tight">TS EN 206<br />VALID</span>
-            </div>
-          </div>
-
-          <div className="flex flex-col">
-            <h4 className="text-title-sm font-title-sm text-on-surface">{t('accreditationTitle')}</h4>
-            <p className="text-body-md font-body-md text-on-surface-variant max-w-md">
-              {t('accreditationDesc')}
-            </p>
-          </div>
-        </div>
-        <PDFExporter
-          optimizedMix={optimizedMix}
-          opcMix={opcMix}
-          targetClass={strengthClass}
-          priority={priority}
-          prices={prices}
-        />
-      </footer>
     </div>
   );
 }
