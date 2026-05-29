@@ -33,7 +33,7 @@ export default function Home() {
         {/* Center: Navigation Links */}
         <div className="hidden md:flex items-center gap-6">
           <a
-            className="text-[#4edea3] font-bold border-b-2 border-[#4edea3] pb-1 text-sm hover:text-white transition-colors duration-300"
+            className="text-[#4edea3] font-bold text-sm hover:text-white transition-colors duration-300"
             href="#"
           >
             Dashboard / Panel
