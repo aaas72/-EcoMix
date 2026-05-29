@@ -1,9 +1,14 @@
+'use client';
+
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import MixOptimizer from '@/components/MixOptimizer';
+import { LanguageProvider, useLanguage } from '@/components/LanguageContext';
 
-export default function Home() {
+function DashboardContent() {
+  const { t } = useLanguage();
+
   return (
     <div className="flex flex-col min-h-screen bg-[#101415] relative overflow-hidden">
       {/* Background neon gradients */}
@@ -28,16 +33,13 @@ export default function Home() {
           </div>
           <div className="max-w-4xl space-y-2">
             <h2 className="text-lg font-black text-[#e0e3e5]">
-              <span>Constrained Concrete Mixture Optimization / Beton Karışım Optimizasyonu</span>
+              <span>{t('subtitle')}</span>
             </h2>
             <p className="text-xs text-[#c6c6cc] leading-relaxed">
-              <strong>EcoMix Optimizer</strong> represents an academic engineering milestone, balancing software mathematical optimizations 
-              with civil structural constraints. Through Bolomey calculations and eco-substitute k-factors, it optimizes mixtures 
-              for strength requirements (<strong className="text-[#4edea3]">C25 to C40</strong>) under standard{' '}
-              <strong className="text-[#89ceff]">TS EN 206</strong> durabilities, minimizing cost and carbon footprint in real-time.
+              {t('academicIntro')}
             </p>
             <p className="text-[11px] text-slate-500 italic">
-              * EcoMix Optimizer, yazılım matematiksel optimizasyonları ile inşaat yapısal kısıtlamalarını dengeleyen akademik bir mühendislik kilometre taşıdır.
+              {t('academicIntroSub')}
             </p>
           </div>
         </section>
@@ -51,5 +53,13 @@ export default function Home() {
       {/* Modular Footer */}
       <Footer />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <LanguageProvider>
+      <DashboardContent />
+    </LanguageProvider>
   );
 }

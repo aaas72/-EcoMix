@@ -24,22 +24,20 @@ import {
   getOpcBenchmark,
   TARGET_STRENGTHS,
   DEFAULT_MATERIALS,
-} from './OptimizationEngine';
+} from '@/lib/OptimizationEngine';
+import { useLanguage } from './LanguageContext';
 
 export default function MixOptimizer() {
+  const { t, language } = useLanguage();
   // Optimization State
   const [strengthClass, setStrengthClass] = useState<'C25' | 'C30' | 'C35' | 'C40'>('C35');
   const [priority, setPriority] = useState<'cost' | 'carbon' | 'balanced'>('balanced');
 
-  // Interactive Material weights driven by sliders
+  // Interactive Material weights driven automatically by backend API and manually by sliders
   const [cementWeight, setCementWeight] = useState(180);
   const [flyAshWeight, setFlyAshWeight] = useState(120);
   const [slagWeight, setSlagWeight] = useState(40);
   const [silicaFumeWeight, setSilicaFumeWeight] = useState(0);
-
-  // Backend Integration State
-  const [backendStatus, setBackendStatus] = useState<'online' | 'offline'>('offline');
-  const [backendSolvedResult, setBackendSolvedResult] = useState<any>(null);
 
   // Constants
   const prices = useMemo(
@@ -52,46 +50,9 @@ export default function MixOptimizer() {
     []
   );
 
-  // 1. Check Backend API Server Health
+  // 1. Compute constraint optimization recommendation locally & reactively AUTO-UPDATE sliders
   useEffect(() => {
-    fetch('http://localhost:5000/api/health')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === 'online') {
-          setBackendStatus('online');
-        }
-      })
-      .catch(() => setBackendStatus('offline'));
-  }, []);
-
-  // 2. Fetch constraint optimization recommendation from Backend API
-  useEffect(() => {
-    fetch('http://localhost:5000/api/optimize', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        strengthClass,
-        optimizationPriority: priority,
-        cementPrice: prices.cement,
-        flyAshPrice: prices.flyAsh,
-        slagPrice: prices.slag,
-        silicaFumePrice: prices.silicaFume,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setBackendSolvedResult(data.optimizedResult);
-        }
-      })
-      .catch((err) => {
-        console.warn('Backend server optimizer is offline, using client solver fallback.', err);
-      });
-  }, [strengthClass, priority, prices]);
-
-  // Apply server-solved recommendation values to standard weights state
-  const applyServerRecommendation = () => {
-    const recommended = backendSolvedResult || optimizeConcreteMix({
+    const localSolved = optimizeConcreteMix({
       strengthClass,
       optimizationPriority: priority,
       cementPrice: prices.cement,
@@ -99,16 +60,15 @@ export default function MixOptimizer() {
       slagPrice: prices.slag,
       silicaFumePrice: prices.silicaFume,
     });
-
-    if (recommended) {
-      setCementWeight(recommended.cement);
-      setFlyAshWeight(recommended.flyAsh);
-      setSlagWeight(recommended.slag);
-      setSilicaFumeWeight(recommended.silicaFume);
+    if (localSolved) {
+      setCementWeight(localSolved.cement);
+      setFlyAshWeight(localSolved.flyAsh);
+      setSlagWeight(localSolved.slag);
+      setSilicaFumeWeight(localSolved.silicaFume);
     }
-  };
+  }, [strengthClass, priority, prices]);
 
-  // Compute live properties for current slider configuration
+  // 2. Compute live properties for current slider configuration
   const optimizedMix = useMemo(() => {
     const usedVol =
       cementWeight / DEFAULT_MATERIALS.cement.density +
@@ -122,9 +82,6 @@ export default function MixOptimizer() {
     const sand = Math.round(aggWeight * 0.4);
     const gravel = Math.round(aggWeight * 0.6);
 
-    const targetStrengthValue = TARGET_STRENGTHS[strengthClass];
-
-    // local solver fallback estimation logic
     const solvedLocal = optimizeConcreteMix({
       strengthClass,
       optimizationPriority: priority,
@@ -155,59 +112,58 @@ export default function MixOptimizer() {
 
   const carbonReduction = Math.round(((opcMix.carbon - optimizedMix.carbon) / opcMix.carbon) * 100);
   const costSavings = Math.round(((opcMix.cost - optimizedMix.cost) / opcMix.cost) * 100);
-
-  // Charts data
-  const weightChartData = [
-    { name: 'OPC', OPC: opcMix.carbon, EcoMix: 0 },
-    { name: 'EcoMix Opt', OPC: 0, EcoMix: optimizedMix.carbon },
-  ];
-
-  const radarChartData = [
-    { subject: 'Strength / Mukavemet', OPC: 90, EcoMix: Math.min(100, Math.round((optimizedMix.strength / TARGET_STRENGTHS[strengthClass]) * 95)) },
-    { subject: 'Cost / Maliyet', OPC: 80, EcoMix: Math.min(100, Math.round((optimizedMix.cost / opcMix.cost) * -100 + 150)) },
-    { subject: 'Carbon / Karbon', OPC: 20, EcoMix: Math.min(100, Math.round((optimizedMix.carbon / opcMix.carbon) * -100 + 150)) },
-    { subject: 'Workability / İşlenebilirlik', OPC: 85, EcoMix: 92 },
-    { subject: 'Durability / Dayanıklılık', OPC: 80, EcoMix: optimizedMix.wbRatio <= 0.45 ? 100 : 70 },
-  ];
-
   // TS EN 206 Standards Compliance Flags
   const isWbCompliant = optimizedMix.wbRatio <= 0.45;
   const isBinderCompliant = optimizedMix.totalBinder >= 300;
   const totalReplacementRatio = ((optimizedMix.flyAsh + optimizedMix.slag + optimizedMix.silicaFume) / optimizedMix.totalBinder) * 100;
   const isReplacementCompliant = totalReplacementRatio <= 75;
 
+  // Charts data
+  const weightChartData = [
+    { name: 'OPC', OPC: opcMix.carbon, EcoMix: 0 },
+    { name: t('ecomixOpt') as any, OPC: 0, EcoMix: optimizedMix.carbon },
+  ];
+
+  const radarChartData = [
+    { subject: t('radarStrength'), OPC: 90, EcoMix: Math.min(100, Math.round((optimizedMix.strength / TARGET_STRENGTHS[strengthClass]) * 95)) },
+    { subject: t('radarCost'), OPC: 80, EcoMix: Math.min(100, Math.round((optimizedMix.cost / opcMix.cost) * -100 + 150)) },
+    { subject: t('radarCarbon'), OPC: 20, EcoMix: Math.min(100, Math.round((optimizedMix.carbon / opcMix.carbon) * -100 + 150)) },
+    { subject: t('radarWorkability'), OPC: 85, EcoMix: 92 },
+    { subject: t('radarDurability'), OPC: 80, EcoMix: optimizedMix.wbRatio <= 0.45 ? 100 : 70 },
+  ];
+
   return (
     <div className="flex flex-col gap-gutter">
       {/* 4-Card Overview KPI Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter w-full">
         <KPICard
-          label="Carbon Reduction / Karbon Azaltımı"
+          label={t('carbonRed')}
           icon="eco"
           metric={`-${carbonReduction}%`}
-          caption="vs Standard OPC"
+          caption={t('carbonRedCap')}
           glowColor="#4edea3"
         />
         <KPICard
-          label="Cost Savings / Maliyet Tasarrufu"
+          label={t('costSavings')}
           icon="payments"
           metric={`-${costSavings}%`}
-          caption="Per Cubic Meter"
+          caption={t('costSavingsCap')}
           glowColor="#89ceff"
         />
         <KPICard
-          label="28-Day Strength / 28 Günlük Dayanım"
+          label={t('strengthMetric')}
           icon="fitness_center"
           metric={`${optimizedMix.strength} MPa`}
-          caption={`Target: ${TARGET_STRENGTHS[strengthClass]} MPa`}
+          caption={`${t('strengthCap')}: ${TARGET_STRENGTHS[strengthClass]} MPa`}
           glowColor="#c9e6ff"
         />
         <KPICard
-          label="Compliance Status / Uyumluluk Durumu"
+          label={t('compliance')}
           icon="verified"
-          metric="Fully Compliant"
-          caption="TS EN 206 Validated"
+          metric={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
+          caption={t('complianceCap')}
           glowColor="#4edea3"
-          footer="Tam Uyumlu"
+          footer={isWbCompliant && isBinderCompliant && isReplacementCompliant ? t('fullyCompliant') : t('nonCompliant')}
         />
       </section>
 
@@ -217,23 +173,16 @@ export default function MixOptimizer() {
         <div className="lg:col-span-4 flex flex-col gap-gutter w-full">
           <div className="glass-panel p-panel-padding space-y-4">
             <div className="flex justify-between items-center border-b border-white/5 pb-2">
-              <h2 className="text-title-sm font-title-sm text-on-surface flex items-center gap-2">
+              <h2 className="text-title-sm font-title-sm text-on-surface flex items-center gap-2 w-full">
                 <span className="material-symbols-outlined text-[#4edea3]">tune</span>
-                Mix Parameters / Karışım Parametreleri
+                {t('mixParams')}
               </h2>
-              {/* Backend Status Dot Indicator */}
-              <div className="flex items-center gap-1.5 bg-[#1d2022] border border-white/5 px-2.5 py-1 rounded-full text-[9px] font-bold">
-                <span className={`w-2 h-2 rounded-full ${backendStatus === 'online' ? 'bg-[#4edea3] animate-pulse' : 'bg-rose-500'}`}></span>
-                <span className={backendStatus === 'online' ? 'text-[#4edea3]' : 'text-rose-400'}>
-                  {backendStatus === 'online' ? 'API Online / Bağlı' : 'API Offline / Çevrimdışı'}
-                </span>
-              </div>
             </div>
 
             {/* Strength Class Selection */}
             <div className="mb-stack-lg">
               <label className="text-label-caps font-label-caps text-on-surface-variant block mb-2">
-                Strength Class / Dayanım Sınıfı
+                {t('strengthClass')}
               </label>
               <div className="flex bg-[#323537] p-1 rounded-lg border border-white/5">
                 {(['C25', 'C30', 'C35', 'C40'] as const).map((cls) => (
@@ -255,7 +204,7 @@ export default function MixOptimizer() {
             {/* Optimization Target Select */}
             <div className="mb-stack-lg">
               <label className="text-label-caps font-label-caps text-on-surface-variant block mb-2">
-                Optimization Target / Optimizasyon Hedefi
+                {t('optTarget')}
               </label>
               <div className="flex bg-[#323537] p-1 rounded-lg border border-white/5 flex-col sm:flex-row gap-1">
                 {(['balanced', 'cost', 'carbon'] as const).map((pr) => (
@@ -268,25 +217,16 @@ export default function MixOptimizer() {
                         : 'text-on-surface-variant hover:bg-white/5'
                     }`}
                   >
-                    {pr === 'balanced' ? 'Balanced / Dengeli' : pr === 'cost' ? 'Min Cost' : 'Min Carbon'}
+                    {pr === 'balanced' ? t('balanced') : pr === 'cost' ? t('minCost') : t('minCarbon')}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Active API Solver Trigger Button */}
-            <button
-              onClick={applyServerRecommendation}
-              className="w-full bg-[#101415] hover:bg-[#1d2022] active:scale-98 transition-all border border-[#4edea3]/30 text-[#4edea3] py-3 rounded-xl font-bold text-xs cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(78,222,163,0.05)] hover:shadow-[0_0_15px_rgba(78,222,163,0.1)] group"
-            >
-              <span className="material-symbols-outlined text-sm group-hover:rotate-45 transition-transform">bolt</span>
-              <span>Load Server-Optimized Mix / Sunucu Hesaplamasını Yükle</span>
-            </button>
-
             {/* Sliders */}
             <div className="flex flex-col gap-stack-md pt-2">
               <PriceSlider
-                label="CEM I (Portland)"
+                label={t('cement')}
                 value={cementWeight}
                 min={100}
                 max={400}
@@ -295,7 +235,7 @@ export default function MixOptimizer() {
                 onChange={setCementWeight}
               />
               <PriceSlider
-                label="Fly Ash (Uçucu Kül)"
+                label={t('flyAsh')}
                 value={flyAshWeight}
                 min={0}
                 max={200}
@@ -304,7 +244,7 @@ export default function MixOptimizer() {
                 onChange={setFlyAshWeight}
               />
               <PriceSlider
-                label="GGBS (Cüruf)"
+                label={t('slag')}
                 value={slagWeight}
                 min={0}
                 max={200}
@@ -313,7 +253,7 @@ export default function MixOptimizer() {
                 onChange={setSlagWeight}
               />
               <PriceSlider
-                label="Silica Fume (Silis Dumanı)"
+                label={t('silicaFume')}
                 value={silicaFumeWeight}
                 min={0}
                 max={50}
@@ -323,6 +263,50 @@ export default function MixOptimizer() {
               />
             </div>
           </div>
+
+          {/* Dynamic Recipe Card to balance the vertical spacing */}
+          <div className="glass-panel p-panel-padding space-y-3">
+            <h3 className="text-title-sm font-title-sm text-on-surface border-b border-white/5 pb-2 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#89ceff]">assignment</span>
+              {language === 'en' ? 'Material Recipe / m³' : 'Malzeme Reçetesi / m³'}
+            </h3>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between border-b border-white/5 pb-1">
+                <span className="text-slate-400">{t('cement')}</span>
+                <span className="font-bold text-[#e0e3e5]">{optimizedMix.cement} kg</span>
+              </div>
+              {optimizedMix.flyAsh > 0 && (
+                <div className="flex justify-between border-b border-white/5 pb-1">
+                  <span className="text-[#89ceff]">{t('flyAsh')}</span>
+                  <span className="font-bold text-[#89ceff]">{optimizedMix.flyAsh} kg</span>
+                </div>
+              )}
+              {optimizedMix.slag > 0 && (
+                <div className="flex justify-between border-b border-white/5 pb-1">
+                  <span className="text-[#89ceff]">{t('slag')}</span>
+                  <span className="font-bold text-[#89ceff]">{optimizedMix.slag} kg</span>
+                </div>
+              )}
+              {optimizedMix.silicaFume > 0 && (
+                <div className="flex justify-between border-b border-white/5 pb-1">
+                  <span className="text-[#909096]">{t('silicaFume')}</span>
+                  <span className="font-bold text-[#909096]">{optimizedMix.silicaFume} kg</span>
+                </div>
+              )}
+              <div className="flex justify-between border-b border-white/5 pb-1">
+                <span className="text-slate-400">{language === 'en' ? 'Mixing Water' : 'Karışım Suyu'}</span>
+                <span className="font-bold text-[#e0e3e5]">{optimizedMix.water} kg</span>
+              </div>
+              <div className="flex justify-between border-b border-white/5 pb-1">
+                <span className="text-slate-400">{language === 'en' ? 'Fine Sand' : 'İnce Kum'}</span>
+                <span className="font-bold text-[#e0e3e5]">{optimizedMix.sand} kg</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">{language === 'en' ? 'Coarse Gravel' : 'Kaba Mıcır'}</span>
+                <span className="font-bold text-[#e0e3e5]">{optimizedMix.gravel} kg</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Right Analytics Column */}
@@ -330,29 +314,29 @@ export default function MixOptimizer() {
           {/* TS EN 206 Compliance panel */}
           <div className="glass-panel p-panel-padding flex flex-col md:flex-row gap-stack-md justify-between items-center">
             <div className="flex flex-col">
-              <h3 className="text-title-sm font-title-sm text-on-surface">TS EN 206 Parameters / Parametreleri</h3>
-              <span className="text-label-caps font-label-caps text-on-surface-variant">Exposure Class / Maruz Kalma: XC3, XF1</span>
+              <h3 className="text-title-sm font-title-sm text-on-surface">{t('standardsParams')}</h3>
+              <span className="text-label-caps font-label-caps text-on-surface-variant">{t('exposureClass')}</span>
             </div>
 
             <div className="flex gap-stack-lg">
               <ComplianceIndicator
                 value={optimizedMix.wbRatio}
-                label="W/B Ratio / Su-Bağlayıcı"
-                limitLabel="Max Limit / Azami Limit: 0.45"
+                label={t('wbRatio')}
+                limitLabel={`${t('maxLimit')}: 0.45`}
                 isCompliant={isWbCompliant}
               />
               <div className="w-px bg-white/10 h-10 align-middle self-center"></div>
               <ComplianceIndicator
                 value={`${optimizedMix.totalBinder} kg`}
-                label="Total Binder / Bağlayıcı"
-                limitLabel="Min Limit / Asgari Limit: 300 kg"
+                label={t('totalBinder')}
+                limitLabel={`${t('minLimit')}: 300 kg`}
                 isCompliant={isBinderCompliant}
               />
               <div className="w-px bg-white/10 h-10 align-middle self-center"></div>
               <ComplianceIndicator
                 value={`${Math.round(totalReplacementRatio)}%`}
-                label="Replacement / İkame"
-                limitLabel="Max Limit / Azami Limit: 75%"
+                label={t('replacement')}
+                limitLabel={`${t('maxLimit')}: 75%`}
                 isCompliant={isReplacementCompliant}
                 isAccentBlue={true}
               />
@@ -363,7 +347,7 @@ export default function MixOptimizer() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
             <div className="glass-panel p-panel-padding flex flex-col min-h-[300px]">
               <h3 className="text-title-sm font-title-sm text-on-surface mb-stack-md">
-                Emissions vs Standard / Karbon Karşılaştırması (kg CO₂e/m³)
+                {t('chartCarbonTitle')}
               </h3>
               <div className="h-64 mt-2">
                 <ResponsiveContainer width="100%" height="100%">
@@ -371,14 +355,15 @@ export default function MixOptimizer() {
                     <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
                     <YAxis stroke="#64748b" fontSize={11} />
                     <ReChartsTooltip
+                      cursor={false}
                       contentStyle={{
                         backgroundColor: '#101415',
                         borderColor: '#272a2c',
                         color: '#e0e3e5',
                       }}
                     />
-                    <Bar dataKey="OPC" fill="#323537" radius={[4, 4, 0, 0]} name="OPC Standard" />
-                    <Bar dataKey="EcoMix" fill="#4edea3" radius={[4, 4, 0, 0]} name="EcoMix Opt" />
+                    <Bar dataKey="OPC" fill="#323537" radius={[4, 4, 0, 0]} name={t('opcStandard') as string} />
+                    <Bar dataKey="EcoMix" fill="#4edea3" radius={[4, 4, 0, 0]} name={t('ecomixOpt') as string} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -386,7 +371,7 @@ export default function MixOptimizer() {
 
             <div className="glass-panel p-panel-padding flex flex-col min-h-[300px]">
               <h3 className="text-title-sm font-title-sm text-on-surface mb-stack-md">
-                Performance Matrix / Performans Matrisi
+                {t('chartRadarTitle')}
               </h3>
               <div className="h-64 mt-2">
                 <ResponsiveContainer width="100%" height="100%">
@@ -394,8 +379,8 @@ export default function MixOptimizer() {
                     <PolarGrid stroke="#323537" />
                     <PolarAngleAxis dataKey="subject" stroke="#c6c6cc" fontSize={9} />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#272a2c" tick={false} />
-                    <Radar name="OPC" dataKey="OPC" stroke="#45474b" fill="#45474b" fillOpacity={0.15} />
-                    <Radar name="EcoMix" dataKey="EcoMix" stroke="#4edea3" fill="#4edea3" fillOpacity={0.3} />
+                    <Radar name={t('opcStandard') as string} dataKey="OPC" stroke="#45474b" fill="#45474b" fillOpacity={0.15} />
+                    <Radar name={t('ecomixOpt') as string} dataKey="EcoMix" stroke="#4edea3" fill="#4edea3" fillOpacity={0.3} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
                   </RadarChart>
                 </ResponsiveContainer>
@@ -419,9 +404,9 @@ export default function MixOptimizer() {
           </div>
 
           <div className="flex flex-col">
-            <h4 className="text-title-sm font-title-sm text-on-surface">Academic Accreditation Panel / Akademik Akreditasyon Paneli</h4>
+            <h4 className="text-title-sm font-title-sm text-on-surface">{t('accreditationTitle')}</h4>
             <p className="text-body-md font-body-md text-on-surface-variant max-w-md">
-              Mix design meets structural integrity requirements per TS EN 206. Ready for academic review and MÜDEK compliance logging.
+              {t('accreditationDesc')}
             </p>
           </div>
         </div>

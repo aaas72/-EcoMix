@@ -1,5 +1,38 @@
-// Concrete baseline properties
-const DEFAULT_MATERIALS = {
+export interface MaterialProperties {
+  name: string;
+  cost: number; // USD per kg
+  carbon: number; // kg CO2 per kg
+  density: number; // kg/m^3
+}
+
+export interface ConcreteMix {
+  cement: number; // kg
+  water: number; // kg
+  sand: number; // kg
+  gravel: number; // kg
+  flyAsh: number; // kg
+  slag: number; // kg
+  silicaFume: number; // kg
+  // Output Properties
+  strength: number; // MPa
+  wbRatio: number;
+  totalBinder: number;
+  cost: number; // USD per m^3
+  carbon: number; // kg CO2 per m^3
+  volume: number; // should be close to 1000 liters (1 m^3)
+}
+
+export interface OptimizationTarget {
+  strengthClass: 'C25' | 'C30' | 'C35' | 'C40';
+  optimizationPriority: 'cost' | 'carbon' | 'balanced';
+  cementPrice: number;
+  flyAshPrice: number;
+  slagPrice: number;
+  silicaFumePrice: number;
+}
+
+// Global baseline constants
+export const DEFAULT_MATERIALS: Record<string, MaterialProperties> = {
   cement: { name: 'OPC Cement (CEM I)', cost: 0.12, carbon: 0.85, density: 3150 },
   water: { name: 'Water', cost: 0.002, carbon: 0.0002, density: 1000 },
   sand: { name: 'Fine Aggregate (Sand)', cost: 0.018, carbon: 0.005, density: 2650 },
@@ -9,20 +42,37 @@ const DEFAULT_MATERIALS = {
   silicaFume: { name: 'Silica Fume (Recycled)', cost: 0.35, carbon: 0.025, density: 2200 },
 };
 
-const K_FACTORS = {
+// TS EN 206 standard efficiency factors (k-values)
+export const K_FACTORS = {
   flyAsh: 0.4,
   slag: 0.6,
   silicaFume: 2.0,
 };
 
-const TARGET_STRENGTHS = {
-  C25: 30,
-  C30: 37,
-  C35: 45,
-  C40: 50,
+// Target strengths in MPa (f_ck_cube)
+export const TARGET_STRENGTHS = {
+  C25: 30, // f_ck_cube is 30 MPa (25 MPa cylinder)
+  C30: 37, // f_ck_cube is 37 MPa (30 MPa cylinder)
+  C35: 45, // f_ck_cube is 45 MPa (35 MPa cylinder)
+  C40: 50, // f_ck_cube is 50 MPa (40 MPa cylinder)
 };
 
-function calculateMixProperties(cement, water, flyAsh, slag, silicaFume, sand, gravel, prices = {}) {
+/**
+ * Calculates concrete mix properties using structural concrete chemistry.
+ * Uses the Bolomey formula for strength estimation:
+ * f_c = K_b * (B / (W + Air) - 0.5)
+ * where B = Cement + k_fa * FlyAsh + k_sl * Slag + k_sf * SilicaFume
+ */
+export function calculateMixProperties(
+  cement: number,
+  water: number,
+  flyAsh: number,
+  slag: number,
+  silicaFume: number,
+  sand: number,
+  gravel: number,
+  prices: Partial<Record<string, number>> = {}
+): ConcreteMix {
   const matPrices = {
     cement: prices.cement ?? DEFAULT_MATERIALS.cement.cost,
     water: DEFAULT_MATERIALS.water.cost,
@@ -33,14 +83,23 @@ function calculateMixProperties(cement, water, flyAsh, slag, silicaFume, sand, g
     silicaFume: prices.silicaFume ?? DEFAULT_MATERIALS.silicaFume.cost,
   };
 
+  // Calculate Binder
   const totalBinder = cement + flyAsh + slag + silicaFume;
-  const B_eff = cement + K_FACTORS.flyAsh * flyAsh + K_FACTORS.slag * slag + K_FACTORS.silicaFume * silicaFume;
+  
+  // Effective binder weight according to TS EN 206
+  const B_eff =
+    cement +
+    K_FACTORS.flyAsh * flyAsh +
+    K_FACTORS.slag * slag +
+    K_FACTORS.silicaFume * silicaFume;
+
   const wbRatio = water / (cement > 0 ? cement : 1);
 
   // Strength Estimation (Bolomey Formula)
   const Kb = 34;
   const strength = Kb * (B_eff / (water + 15) - 0.5);
 
+  // Cost calculation
   const totalCost =
     cement * matPrices.cement +
     water * matPrices.water +
@@ -50,6 +109,7 @@ function calculateMixProperties(cement, water, flyAsh, slag, silicaFume, sand, g
     slag * matPrices.slag +
     silicaFume * matPrices.silicaFume;
 
+  // Carbon footprint calculation
   const totalCarbon =
     cement * DEFAULT_MATERIALS.cement.carbon +
     water * DEFAULT_MATERIALS.water.carbon +
@@ -59,6 +119,7 @@ function calculateMixProperties(cement, water, flyAsh, slag, silicaFume, sand, g
     slag * DEFAULT_MATERIALS.slag.carbon +
     silicaFume * DEFAULT_MATERIALS.silicaFume.carbon;
 
+  // Calculate volume to ensure it equals 1m^3 (1000 liters)
   const volume =
     cement / DEFAULT_MATERIALS.cement.density +
     water / DEFAULT_MATERIALS.water.density +
@@ -69,35 +130,47 @@ function calculateMixProperties(cement, water, flyAsh, slag, silicaFume, sand, g
     silicaFume / DEFAULT_MATERIALS.silicaFume.density;
 
   return {
-    cement: Math.round(cement),
-    water: Math.round(water),
-    sand: Math.round(sand),
-    gravel: Math.round(gravel),
-    flyAsh: Math.round(flyAsh),
-    slag: Math.round(slag),
-    silicaFume: Math.round(silicaFume),
+    cement,
+    water,
+    sand,
+    gravel,
+    flyAsh,
+    slag,
+    silicaFume,
     strength: Math.max(0, Math.round(strength * 10) / 10),
     wbRatio: Math.round(wbRatio * 100) / 100,
-    totalBinder: Math.round(totalBinder),
+    totalBinder,
     cost: Math.round(totalCost * 100) / 100,
     carbon: Math.round(totalCarbon * 100) / 100,
     volume: Math.round(volume * 1000) / 1000,
   };
 }
 
-function optimizeConcreteMix(target) {
-  const reqStrength = TARGET_STRENGTHS[target.strengthClass] || 37;
-  let bestMix = null;
-  let bestScore = Infinity;
+/**
+ * Optimization Engine Solver: samples search space of replacement ratios
+ * under TS EN 206 limits, and picks the mix minimizing Cost or Carbon
+ */
+export function optimizeConcreteMix(target: OptimizationTarget): ConcreteMix {
+  const reqStrength = TARGET_STRENGTHS[target.strengthClass];
+  
+  let bestMix: ConcreteMix | null = null;
+  let bestScore = Infinity; // Lower is better
 
   const prices = {
-    cement: target.cementPrice ?? DEFAULT_MATERIALS.cement.cost,
-    flyAsh: target.flyAshPrice ?? DEFAULT_MATERIALS.flyAsh.cost,
-    slag: target.slagPrice ?? DEFAULT_MATERIALS.slag.cost,
-    silicaFume: target.silicaFumePrice ?? DEFAULT_MATERIALS.silicaFume.cost,
+    cement: target.cementPrice,
+    flyAsh: target.flyAshPrice,
+    slag: target.slagPrice,
+    silicaFume: target.silicaFumePrice,
   };
 
-  // Optimization grid search: sample green replacement ratios
+  const waterOPC = 185;
+  const cementOPC = Math.round((reqStrength / 34 + 0.5) * (waterOPC + 15));
+  const aggregateOPC = 2400 - cementOPC - waterOPC;
+  const sandOPC = Math.round(aggregateOPC * 0.4);
+  const gravelOPC = Math.round(aggregateOPC * 0.6);
+  const opcMix = calculateMixProperties(cementOPC, waterOPC, 0, 0, 0, sandOPC, gravelOPC, prices);
+
+  // Optimization grid search
   for (let faPct = 0; faPct <= 35; faPct += 2) {
     for (let slagPct = 0; slagPct <= 70; slagPct += 5) {
       for (let sfPct = 0; sfPct <= 10; sfPct += 2) {
@@ -116,7 +189,7 @@ function optimizeConcreteMix(target) {
 
           if (C_total < 300) continue;
 
-          const cement = C_total * cementF;
+          const cement = C_total * (1 - (faPct + slagPct + sfPct) / 100);
           const flyAsh = C_total * (faPct / 100);
           const slag = C_total * (slagPct / 100);
           const silicaFume = C_total * (sfPct / 100);
@@ -140,11 +213,11 @@ function optimizeConcreteMix(target) {
           const gravel = Math.round(aggregateWeight * 0.6);
 
           const candidate = calculateMixProperties(
-            cement,
-            water,
-            flyAsh,
-            slag,
-            silicaFume,
+            Math.round(cement),
+            Math.round(water),
+            Math.round(flyAsh),
+            Math.round(slag),
+            Math.round(silicaFume),
             sand,
             gravel,
             prices
@@ -170,22 +243,15 @@ function optimizeConcreteMix(target) {
     }
   }
 
-  // Fallback default OPC
-  if (!bestMix) {
-    const waterOPC = 185;
-    const cementOPC = Math.round((reqStrength / 34 + 0.5) * (waterOPC + 15));
-    const aggregateOPC = 2400 - cementOPC - waterOPC;
-    const sandOPC = Math.round(aggregateOPC * 0.4);
-    const gravelOPC = Math.round(aggregateOPC * 0.6);
-    bestMix = calculateMixProperties(cementOPC, waterOPC, 0, 0, 0, sandOPC, gravelOPC, prices);
-  }
-
-  return bestMix;
+  return bestMix || opcMix;
 }
 
-module.exports = {
-  optimizeConcreteMix,
-  calculateMixProperties,
-  DEFAULT_MATERIALS,
-  TARGET_STRENGTHS,
-};
+export function getOpcBenchmark(targetClass: 'C25' | 'C30' | 'C35' | 'C40'): ConcreteMix {
+  const reqStrength = TARGET_STRENGTHS[targetClass];
+  const waterOPC = 185;
+  const cementOPC = Math.round((reqStrength / 34 + 0.5) * (waterOPC + 15));
+  const aggregateOPC = 2400 - cementOPC - waterOPC;
+  const sandOPC = Math.round(aggregateOPC * 0.4);
+  const gravelOPC = Math.round(aggregateOPC * 0.6);
+  return calculateMixProperties(cementOPC, waterOPC, 0, 0, 0, sandOPC, gravelOPC);
+}
