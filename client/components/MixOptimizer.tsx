@@ -136,8 +136,8 @@ export default function MixOptimizer() {
     <div className="flex flex-col gap-gutter">
       {/* Main 2-Column Grid (Now placed first at the top for intuitive input prioritizing!) */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start w-full">
-        {/* Left Configurator Column */}
-        <div className="lg:col-span-4 flex flex-col gap-gutter w-full lg:sticky lg:top-[90px] lg:self-start z-20">
+        {/* Left Configurator Column - Treated as a fixed sidebar along the entire page length on desktop */}
+        <div className="lg:col-span-4 flex flex-col gap-gutter w-full lg:sticky lg:top-[90px] lg:h-[calc(100vh-120px)] lg:overflow-y-auto lg:self-start z-20 pr-1 [scrollbar-width:thin]">
           <div className="glass-panel p-panel-padding space-y-4">
             <div className="flex justify-between items-center border-b border-white/5 pb-2">
               <h2 className="text-title-sm font-title-sm text-on-surface flex items-center gap-2 w-full">
