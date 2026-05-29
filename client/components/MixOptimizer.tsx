@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -37,6 +37,10 @@ export default function MixOptimizer() {
   const [slagWeight, setSlagWeight] = useState(40);
   const [silicaFumeWeight, setSilicaFumeWeight] = useState(0);
 
+  // Backend Integration State
+  const [backendStatus, setBackendStatus] = useState<'online' | 'offline'>('offline');
+  const [backendSolvedResult, setBackendSolvedResult] = useState<any>(null);
+
   // Constants
   const prices = useMemo(
     () => ({
@@ -48,7 +52,63 @@ export default function MixOptimizer() {
     []
   );
 
-  // Compute live properties
+  // 1. Check Backend API Server Health
+  useEffect(() => {
+    fetch('http://localhost:5000/api/health')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === 'online') {
+          setBackendStatus('online');
+        }
+      })
+      .catch(() => setBackendStatus('offline'));
+  }, []);
+
+  // 2. Fetch constraint optimization recommendation from Backend API
+  useEffect(() => {
+    fetch('http://localhost:5000/api/optimize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        strengthClass,
+        optimizationPriority: priority,
+        cementPrice: prices.cement,
+        flyAshPrice: prices.flyAsh,
+        slagPrice: prices.slag,
+        silicaFumePrice: prices.silicaFume,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setBackendSolvedResult(data.optimizedResult);
+        }
+      })
+      .catch((err) => {
+        console.warn('Backend server optimizer is offline, using client solver fallback.', err);
+      });
+  }, [strengthClass, priority, prices]);
+
+  // Apply server-solved recommendation values to standard weights state
+  const applyServerRecommendation = () => {
+    const recommended = backendSolvedResult || optimizeConcreteMix({
+      strengthClass,
+      optimizationPriority: priority,
+      cementPrice: prices.cement,
+      flyAshPrice: prices.flyAsh,
+      slagPrice: prices.slag,
+      silicaFumePrice: prices.silicaFume,
+    });
+
+    if (recommended) {
+      setCementWeight(recommended.cement);
+      setFlyAshWeight(recommended.flyAsh);
+      setSlagWeight(recommended.slag);
+      setSilicaFumeWeight(recommended.silicaFume);
+    }
+  };
+
+  // Compute live properties for current slider configuration
   const optimizedMix = useMemo(() => {
     const usedVol =
       cementWeight / DEFAULT_MATERIALS.cement.density +
@@ -64,7 +124,8 @@ export default function MixOptimizer() {
 
     const targetStrengthValue = TARGET_STRENGTHS[strengthClass];
 
-    const solved = optimizeConcreteMix({
+    // local solver fallback estimation logic
+    const solvedLocal = optimizeConcreteMix({
       strengthClass,
       optimizationPriority: priority,
       cementPrice: prices.cement,
@@ -81,7 +142,7 @@ export default function MixOptimizer() {
       silicaFume: silicaFumeWeight,
       sand,
       gravel,
-      strength: Math.min(60, Math.round((solved.strength + (cementWeight - 150) * 0.06 + flyAshWeight * 0.01) * 10) / 10),
+      strength: Math.min(60, Math.round((solvedLocal.strength + (cementWeight - 150) * 0.06 + flyAshWeight * 0.01) * 10) / 10),
       wbRatio: Math.round((160 / (cementWeight + flyAshWeight + slagWeight + silicaFumeWeight)) * 100) / 100,
       totalBinder: cementWeight + flyAshWeight + slagWeight + silicaFumeWeight,
       cost: Math.round((cementWeight * prices.cement + flyAshWeight * prices.flyAsh + slagWeight * prices.slag + silicaFumeWeight * prices.silicaFume + sand * 0.018 + gravel * 0.022 + 160 * 0.002) * 100) / 100,
@@ -117,7 +178,7 @@ export default function MixOptimizer() {
 
   return (
     <div className="flex flex-col gap-gutter">
-      {/* 4-Card Overview KPI Grid (Refactored & Modularized) */}
+      {/* 4-Card Overview KPI Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter w-full">
         <KPICard
           label="Carbon Reduction / Karbon Azaltımı"
@@ -154,11 +215,20 @@ export default function MixOptimizer() {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start w-full">
         {/* Left Configurator Column */}
         <div className="lg:col-span-4 flex flex-col gap-gutter w-full">
-          <div className="glass-panel p-panel-padding">
-            <h2 className="text-title-sm font-title-sm text-on-surface mb-stack-md flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#4edea3]">tune</span>
-              Mix Parameters / Karışım Parametreleri
-            </h2>
+          <div className="glass-panel p-panel-padding space-y-4">
+            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+              <h2 className="text-title-sm font-title-sm text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#4edea3]">tune</span>
+                Mix Parameters / Karışım Parametreleri
+              </h2>
+              {/* Backend Status Dot Indicator */}
+              <div className="flex items-center gap-1.5 bg-[#1d2022] border border-white/5 px-2.5 py-1 rounded-full text-[9px] font-bold">
+                <span className={`w-2 h-2 rounded-full ${backendStatus === 'online' ? 'bg-[#4edea3] animate-pulse' : 'bg-rose-500'}`}></span>
+                <span className={backendStatus === 'online' ? 'text-[#4edea3]' : 'text-rose-400'}>
+                  {backendStatus === 'online' ? 'API Online / Bağlı' : 'API Offline / Çevrimdışı'}
+                </span>
+              </div>
+            </div>
 
             {/* Strength Class Selection */}
             <div className="mb-stack-lg">
@@ -204,8 +274,17 @@ export default function MixOptimizer() {
               </div>
             </div>
 
-            {/* Sliders (Refactored & Modularized) */}
-            <div className="flex flex-col gap-stack-md">
+            {/* Active API Solver Trigger Button */}
+            <button
+              onClick={applyServerRecommendation}
+              className="w-full bg-[#101415] hover:bg-[#1d2022] active:scale-98 transition-all border border-[#4edea3]/30 text-[#4edea3] py-3 rounded-xl font-bold text-xs cursor-pointer flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(78,222,163,0.05)] hover:shadow-[0_0_15px_rgba(78,222,163,0.1)] group"
+            >
+              <span className="material-symbols-outlined text-sm group-hover:rotate-45 transition-transform">bolt</span>
+              <span>Load Server-Optimized Mix / Sunucu Hesaplamasını Yükle</span>
+            </button>
+
+            {/* Sliders */}
+            <div className="flex flex-col gap-stack-md pt-2">
               <PriceSlider
                 label="CEM I (Portland)"
                 value={cementWeight}
@@ -248,7 +327,7 @@ export default function MixOptimizer() {
 
         {/* Right Analytics Column */}
         <div className="lg:col-span-8 flex flex-col gap-gutter w-full">
-          {/* TS EN 206 Compliance panel (Refactored & Modularized) */}
+          {/* TS EN 206 Compliance panel */}
           <div className="glass-panel p-panel-padding flex flex-col md:flex-row gap-stack-md justify-between items-center">
             <div className="flex flex-col">
               <h3 className="text-title-sm font-title-sm text-on-surface">TS EN 206 Parameters / Parametreleri</h3>
